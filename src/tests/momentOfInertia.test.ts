@@ -1,4 +1,4 @@
-import MomentOfInertia from "@/lib/beam/numericCalculations/utils/momentOfInertia";
+import { MomentOfInertia } from "@/lib/beam/numericCalculations/utils/momentOfInertia";
 
 describe("MomentOfInertia Class", () => {
   test("should create a class instance with valid unit input", () => {

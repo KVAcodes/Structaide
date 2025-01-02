@@ -1,7 +1,7 @@
 /**
  * The Beam class handles the creation of the beam object as well as it's analysis.
  */
-import { BeamData } from "./uiInput";
+import { BeamData, Moments, PointLoads } from "./uiInput";
 import { BeamElement } from "./beamElement";
 import Load from "./load";
 import Length from "./length";
@@ -11,12 +11,20 @@ import Rotation from "./rotation";
 import { FlexuralRigidity } from "./flexuralRigidity";
 import { YoungModulus } from "./youngModulus";
 import { MomentOfInertia } from "./momentOfInertia";
+import Matrix from "./matrices";
+import { conjugateGradient } from "./numericalMethods";
+import { beam1 } from "./Examples";
 
 export class Beam {
   private _data: BeamData;
   private elements: BeamElement[];
   private totalDegreesOfFreedom: number;
-
+  private globalStiffnessMatrix: Matrix;
+  private globalNodalForceVector: Matrix;
+  private globalEquivalentForceVector: Matrix;
+  private globalDisplacementVector: Matrix;
+  private unknownDisplacements: (1 | null)[]; // Helps the global Displacement vector keep track of the displacements to be solved for, 1 for unknown, null for known
+  public reactions: Matrix; // The reactions at the supports
   /**
    * Constructor for the Beam class.
    *
@@ -26,7 +34,32 @@ export class Beam {
     this._data = deepCopy(data);
     this.elements = [];
     this.totalDegreesOfFreedom = this.data.boundaryConditions.length * 2;
+    this.globalStiffnessMatrix = new Matrix(
+      this.totalDegreesOfFreedom,
+      this.totalDegreesOfFreedom,
+      0
+    );
+    this.globalNodalForceVector = new Matrix(this.totalDegreesOfFreedom, 1, 0);
+    this.globalEquivalentForceVector = new Matrix(
+      this.totalDegreesOfFreedom,
+      1,
+      0
+    );
+    this.globalDisplacementVector = new Matrix(
+      this.totalDegreesOfFreedom,
+      1,
+      0
+    );
+    this.reactions = new Matrix(this.totalDegreesOfFreedom, 1, 0);
+
     this.resolveUnits();
+    this.elements = this.splitIntoBeamElements();
+    this.assembleGlobalStiffnessMatrix();
+    this.assembleGlobalNodalForceVector();
+    this.assembleGlobalEquivalentForceVector();
+    this.assembleGlobalDisplacementVector();
+    this.unknownDisplacements = this.populateUnknownDisplacements();
+    this.solveForUnknownDisplacements();
   }
 
   /**
@@ -99,13 +132,15 @@ export class Beam {
     this.data.loads?.moments?.forEach((moment) => {
       // magnitude resolution
       const momentObject = new Moment(moment.magnitude, moment.unit);
-      moment.magnitude = this.data.isMetric
-        ? moment.isClockwise
+      if (this.data.isMetric) {
+        moment.magnitude = moment.isClockwise
           ? -momentObject.valueInKNm
-          : momentObject.valueInKNm
-        : moment.isClockwise
-        ? -momentObject.valueInLbfIn
-        : momentObject.valueInLbfIn;
+          : momentObject.valueInKNm;
+      } else {
+        moment.magnitude = moment.isClockwise
+          ? -momentObject.valueInLbfIn
+          : momentObject.valueInLbfIn;
+      }
       // position resolution
       const positionObject = new Length(
         moment.location,
@@ -160,12 +195,14 @@ export class Beam {
    */
   private splitIntoBeamElements(): BeamElement[] {
     const beamElements: BeamElement[] = [];
+    const pointLoads = deepCopy(this.data.loads?.pointLoads);
+    const moments = deepCopy(this.data.loads?.moments);
 
     for (let i = 0; i < this.data.noOfSpans; i++) {
       const beamElementData = this.createBeamElementData(i);
-      this.processPointLoads(beamElementData);
+      this.processPointLoads(beamElementData, pointLoads);
       this.processDistributedLoads(beamElementData);
-      this.processMoments(beamElementData);
+      this.processMoments(beamElementData, moments);
       beamElements.push(new BeamElement(beamElementData));
     }
     return beamElements;
@@ -224,20 +261,23 @@ export class Beam {
   /**
    * helper function to splitIntoBeamElements - filters the point loads for the span
    * @param beamElementData
+   * @param pointLoads
    */
-  private processPointLoads(beamElementData: any): void {
-    if (this.data.loads?.pointLoads?.length) {
+  private processPointLoads(
+    beamElementData: any,
+    pointLoads: PointLoads[] | undefined
+  ): void {
+    if (pointLoads?.length) {
       // filter the point loads for the span
-      beamElementData.pointLoads = this.data.loads.pointLoads.filter(
-        (pointLoad) =>
-          this.isLoadWithinElement(
-            pointLoad.location,
-            beamElementData.start,
-            beamElementData.end
-          )
+      beamElementData.pointLoads = pointLoads.filter((pointLoad) =>
+        this.isLoadWithinElement(
+          pointLoad.location,
+          beamElementData.start,
+          beamElementData.end
+        )
       );
       // Remove the filtered point loads from the main list
-      this.data.loads.pointLoads = this.data.loads.pointLoads.filter(
+      pointLoads = pointLoads.filter(
         (pointLoad) =>
           !this.isLoadWithinElement(
             pointLoad.location,
@@ -252,10 +292,13 @@ export class Beam {
    * helper function to the splitIntoBeamElements - filters the moments for the span
    * @param beamElementData
    */
-  private processMoments(beamElementData: any): void {
-    if (this.data.loads?.moments?.length) {
+  private processMoments(
+    beamElementData: any,
+    moments: Moments[] | undefined
+  ): void {
+    if (moments?.length) {
       // filter the moments for the span
-      beamElementData.moments = this.data.loads.moments.filter((moment) =>
+      beamElementData.moments = moments.filter((moment) =>
         this.isLoadWithinElement(
           moment.location,
           beamElementData.start,
@@ -263,7 +306,7 @@ export class Beam {
         )
       );
       // Remove the filtered moments from the main list
-      this.data.loads.moments = this.data.loads.moments.filter(
+      moments = moments.filter(
         (moment) =>
           !this.isLoadWithinElement(
             moment.location,
@@ -339,7 +382,7 @@ export class Beam {
    * @param end
    */
   private trimDistributedLoad(load: any, start: number, end: number): any {
-    const newLoad = { ...load };
+    const newLoad = deepCopy(load);
 
     if (load.start >= start && load.end <= end) {
       return newLoad;
@@ -378,7 +421,7 @@ export class Beam {
 
     if (adjustType === "end" || adjustType === "both") {
       if (newLoad.startMag < newLoad.endMag) {
-        if (newLoad.startMag === 0) {
+        if (originalLoad.startMag === 0) {
           const x1 = newLoad.end - originalLoad.start;
           const y2 = originalLoad.endMag;
           newLoad.endMag = (x1 * y2) / x2;
@@ -415,7 +458,7 @@ export class Beam {
           newLoad.startMag = originalLoad.startMag + y1;
         }
       } else if (newLoad.startMag > newLoad.endMag) {
-        if (newLoad.endMag === 0) {
+        if (originalLoad.endMag === 0) {
           const x1 = originalLoad.end - newLoad.start;
           const y2 = originalLoad.startMag;
           newLoad.startMag = (x1 * y2) / x2;
@@ -430,11 +473,249 @@ export class Beam {
   }
 
   /**
+   * Assembles the global stiffness matrix for the beam
+   */
+  private assembleGlobalStiffnessMatrix(): void {
+    // Loop through each beam element
+    this.elements.forEach((element) => {
+      let localStiffnessMatrix = element.stiffnessMatrices.normal;
+      if (element.stiffnessMatrices.leftReleased) {
+        localStiffnessMatrix = element.stiffnessMatrices.leftReleased;
+      } else if (element.stiffnessMatrices.rightReleased) {
+        localStiffnessMatrix = element.stiffnessMatrices.rightReleased;
+      }
+      // Get the global DOF indices for the element
+      const globalDOF = element.dofLabels.global;
+
+      // Assemble the local stiffness matrix into the global stiffness matrix
+      for (let i = 0; i < localStiffnessMatrix.rows; i++) {
+        for (let j = 0; j < localStiffnessMatrix.cols; j++) {
+          const globalI = globalDOF[i];
+          const globalJ = globalDOF[j];
+          const localValue = localStiffnessMatrix.get(i, j);
+
+          // Add the local stiffness matrix value to the global stiffness matrix
+          const currentGlobalValue =
+            this.globalStiffnessMatrix.get(globalI, globalJ) || 0;
+
+          const newValue = currentGlobalValue + localValue;
+          this.globalStiffnessMatrix.set(globalI, globalJ, newValue);
+        }
+      }
+    });
+  }
+
+  /**
+   * Assembles the global nodal force vector for the beam
+   *
+   */
+  private assembleGlobalNodalForceVector(): void {
+    this.elements.forEach((element) => {
+      const localNodalForceVector = element.localNodalForceVector;
+      const globalDOF = element.dofLabels.global;
+
+      if (localNodalForceVector) {
+        for (let i = 0; i < localNodalForceVector.rows; i++) {
+          const globalI = globalDOF[i];
+          const localValue = localNodalForceVector.get(i, 0);
+
+          const currentGlobalValue =
+            this.globalNodalForceVector.get(globalI, 0) || 0;
+
+          const newValue = currentGlobalValue + localValue;
+          this.globalNodalForceVector.set(globalI, 0, newValue);
+        }
+      }
+    });
+  }
+
+  /**
+   * Assembles the global equivalent force vector for the beam
+   */
+  private assembleGlobalEquivalentForceVector(): void {
+    this.elements.forEach((element) => {
+      const localEquivalentForceVector = element.localEquivalentForceVector;
+      const globalDOF = element.dofLabels.global;
+
+      if (localEquivalentForceVector) {
+        for (let i = 0; i < localEquivalentForceVector.rows; i++) {
+          const globalI = globalDOF[i];
+          const localValue = localEquivalentForceVector.get(i, 0);
+
+          const currentGlobalValue =
+            this.globalEquivalentForceVector.get(globalI, 0) || 0;
+
+          const newValue = currentGlobalValue + localValue;
+          this.globalEquivalentForceVector.set(globalI, 0, newValue);
+        }
+      }
+    });
+  }
+
+  /**
+   * Assembles the global displacement vector for the beam
+   */
+  public assembleGlobalDisplacementVector(): void {
+    // setting the displacements for each boundary condition
+    this.data.boundaryConditions.forEach((boundaryCondition, index) => {
+      const globalDOF = [index * 2, index * 2 + 1];
+
+      const verticalDisplacement = boundaryCondition.settlement.value;
+      const rotation = boundaryCondition.rotation.value;
+
+      // set known displacements
+      this.globalDisplacementVector.set(globalDOF[0], 0, verticalDisplacement);
+      this.globalDisplacementVector.set(globalDOF[1], 0, rotation);
+    });
+  }
+
+  /**
+   * Populates the unknownDisplacements array with the unknown displacement positions
+   * @returns {(1 | null)[]} The unknown displacements positions
+   */
+  private populateUnknownDisplacements(): (1 | null)[] {
+    const unknowns = new Array(this.totalDegreesOfFreedom).fill(null);
+
+    this.data.boundaryConditions.forEach((boundaryCondition, index) => {
+      const globalDOF = [index * 2, index * 2 + 1];
+      switch (boundaryCondition.type) {
+        case "fixed":
+          break;
+        case "pinned":
+        case "roller":
+          if (!boundaryCondition.rotation.set) {
+            unknowns[globalDOF[1]] = 1;
+          }
+          break;
+        case "internalHinge":
+        case "freeEnd":
+          if (!boundaryCondition.settlement.set) {
+            unknowns[globalDOF[0]] = 1;
+          }
+          if (!boundaryCondition.rotation.set) {
+            unknowns[globalDOF[1]] = 1;
+          }
+          break;
+      }
+    });
+
+    return unknowns;
+  }
+
+  /**
+   * solves for the unknown displacements
+   *
+   */
+  private solveForUnknownDisplacements(): void {
+    // From the Force Displacement equation, F = K * d - F_eq
+    // where F is the global nodal force vector, K is the global stiffness matrix, d is the global displacement vector, F_eq is the global equivalent force vector
+    // therefore, F + F_eq = K * d
+
+    // F + F_eq
+    const globalForceVector = Matrix.add(
+      this.globalNodalForceVector,
+      this.globalEquivalentForceVector
+    );
+
+    // To determine the equations used to determine the unknown displacements,
+    // We partition K, d, and (F + F_eq) based on the unknown displacements
+    // ...
+    // In cases where the displacements for some DOFs are known and non-zero, we need to adjust the global force vector to balance out the equations
+    // Adjusting the global force vector would involce subtracting a PRODUCT from it
+    // PRODUCT:
+    // - The first item of the product is the partition of the rows of the stiffness matrix corresponding to the unknown displacements
+    // * The partition of the rows is done such that the columns in the rows corresponding to the unknown displacement are removed
+    // - The second item of the product is the partition of the global displacement vector, done such that only the known displacements are retained
+
+    const rowsAndColsToRemove: number[] = [];
+    const rowOrColumnToPartition: number[] = []; // for cases where the displacements for a DOF are known and non-zero
+
+    this.unknownDisplacements.forEach((value, index) => {
+      if (value !== 1) {
+        rowsAndColsToRemove.push(index);
+      } else {
+        rowOrColumnToPartition.push(index);
+      }
+    });
+
+    if (rowOrColumnToPartition.length) { // if there are unknown displacements
+      const reducedStiffnessMatrix = this.globalStiffnessMatrix.strike(
+        rowsAndColsToRemove,
+        rowsAndColsToRemove
+      );
+
+      let reducedGlobalForceVector = globalForceVector.strike(
+        rowsAndColsToRemove,
+        []
+      );
+
+      // First item of the product
+      const partedStiffnessMatrix = this.globalStiffnessMatrix
+        .strike(rowsAndColsToRemove, [])
+        .strike([], rowOrColumnToPartition);
+
+      // Second item of the product
+      const knownDisplacements = this.globalDisplacementVector.strike(
+        rowOrColumnToPartition,
+        []
+      );
+
+      // The product
+      const product = Matrix.multiply(
+        partedStiffnessMatrix,
+        knownDisplacements
+      );
+
+      // Adjusting the global force vector by subtracting it from the product
+      reducedGlobalForceVector = Matrix.subtract(
+        reducedGlobalForceVector,
+        product
+      );
+
+      // Solve for the unknown displacements using the conjugate gradient method
+      const solvedDisplacements = conjugateGradient(
+        reducedStiffnessMatrix.matrixData,
+        reducedGlobalForceVector.matrixData.flat()
+      );
+
+      // Debug
+      console.log("Solved Displacements: ", solvedDisplacements);
+
+      // Insert the solved displacements into the global displacement vector
+      rowOrColumnToPartition.forEach((globalIndex, idx) => {
+        this.globalDisplacementVector.set(
+          globalIndex,
+          0,
+          solvedDisplacements[idx]
+        );
+      });
+    }
+
+    // find the reactions
+    // reactions = K * d - (F + F_eq)
+    this.reactions = Matrix.subtract(
+      Matrix.multiply(
+        this.globalStiffnessMatrix,
+        this.globalDisplacementVector
+      ),
+      globalForceVector
+    );
+  }
+
+  /**
    * getter for the beam data
    * @returns {BeamData} The beam data
    */
   get data(): BeamData {
     return this._data;
+  }
+
+  /**
+   * getter for the beam elements
+   * @returns {BeamElement[]} The beam elements
+   */
+  get beamElements(): BeamElement[] {
+    return this.elements;
   }
 }
 
@@ -459,3 +740,9 @@ export function deepCopy<T>(obj: T): T {
   }
   return copy;
 }
+
+// test
+console.time("test");
+const beam = new Beam(beam1);
+console.log(beam.reactions.matrixData);
+console.timeEnd("test");

@@ -2,8 +2,8 @@ import {
   FlexuralRigidityOptions,
   FlexuralRigidity,
 } from "../lib/beam/numericCalculations/utils/flexuralRigidity";
-import YoungModulus from "../lib/beam/numericCalculations/utils/youngModulus";
-import MomentOfInertia from "../lib/beam/numericCalculations/utils/momentOfInertia";
+import { YoungModulus } from "../lib/beam/numericCalculations/utils/youngModulus";
+import { MomentOfInertia } from "../lib/beam/numericCalculations/utils/momentOfInertia";
 
 describe("Flexural Rigidity", () => {
   test.each([

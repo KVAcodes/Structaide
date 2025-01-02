@@ -9,7 +9,11 @@ import {
   Moments,
   DistributedLoads,
 } from "./uiInput";
-import { adaptiveSimpsonsRule, buildFunction, assembleExpression } from "./calculus";
+import {
+  adaptiveSimpsonsRule,
+  buildFunction,
+  assembleExpression,
+} from "./calculus";
 /**
  * Represents the data been parsed into the beam Elements
  *
@@ -53,8 +57,8 @@ export class BeamElement {
   private data: BeamElementDataInterface;
   public dofLabels: DOFMapping;
   public stiffnessMatrices: StiffnessMatrices;
-  public localNodalForceVector: Matrix | null = null;
-  public localEquivalentForceVector: Matrix | null = null;
+  public localNodalForceVector: Matrix = new Matrix(4, 1);
+  public localEquivalentForceVector: Matrix = new Matrix(4, 1);
   public localDisplacementVector: Matrix | null = null;
 
   constructor(beamElementData: BeamElementDataInterface) {
@@ -64,6 +68,8 @@ export class BeamElement {
     // Initializzing stiffnessMatrices with an empty object
     this.stiffnessMatrices = { normal: new Matrix(4, 4) };
     this.calculateStiffnessMatrices();
+    this.getNodalForces();
+    this.getEquivalentForceVector();
   }
 
   /**
@@ -180,7 +186,7 @@ export class BeamElement {
    * The Form of the local nodal force vector is [f1, m1, f2, m2]
    * where f1 and f2 are the forces at the left and right nodes respectively
    * and m1 and m2 are the moments at the left and right nodes respectively
-   * 
+   *
    * Nodal forces/moments exist at the exact location of the boundaryconditions/nodes
    */
   private getNodalForces(): void {
@@ -220,21 +226,20 @@ export class BeamElement {
     }
 
     const nodalForcesArray: number[][] = [
-      [nodalForce1?.magnitude || 0],
-      [nodalMoment1?.magnitude || 0],
-      [nodalForce2?.magnitude || 0],
-      [nodalMoment2?.magnitude || 0],
-    ]
+      [nodalForce1 ? -nodalForce1.magnitude : 0],
+      [nodalMoment1 ? nodalMoment1.magnitude : 0],
+      [nodalForce2 ? -nodalForce2.magnitude : 0],
+      [nodalMoment2 ? nodalMoment2.magnitude : 0],
+    ];
 
     this.localNodalForceVector = Matrix.fromArray(nodalForcesArray);
   }
-
 
   /**
    * Constructs the local equivalent force vector of the beam element
    * The Equivalent force vector is the effect of the forces within the span of the element on the nodes
    * The Form of the local equivalent force vector is [f1, m1, f2, m2]
-   * where f1 and f2 are the effects of the element's forces on the nodes(negative of the simply supported reactions)
+   * where f1 and f2 are the effects of the element's forces on the nodes(negative of the Fixed end reactions)
    * and m1 and m2 are the rotational effects of the element's forces at the nodes(negative of the fixed end moments)
    */
   private getEquivalentForceVector(): void {
@@ -243,17 +248,14 @@ export class BeamElement {
     // finding the fixed end moments
     const [m1, m2] = this.findFixedEndMoments();
     // forming the Equivalent force vector
-    const equivalentForcesArray: number[][] = [
-      [f1],
-      [m1],
-      [f2],
-      [m2],
-    ];
+    const equivalentForcesArray: number[][] = [[f1], [-m1], [f2], [-m2]];
+
+    this.localEquivalentForceVector = Matrix.fromArray(equivalentForcesArray);
   }
 
   /**
    * helper function to getEquivalentForceVector
-   * Applies the equilibrium equations to find the simply supported reactions (f1, f2)
+   * Applies the equilibrium equations to find the Fixed end reactions (f1, f2)
    * sign convention: downward forces and counterclockwise moments are positive
    */
   private applyEquilibriumEquations(): [number, number] {
@@ -268,8 +270,10 @@ export class BeamElement {
       return [this.summationofVerticalForces(), 0];
     }
 
-    // ∑(Ma) + f2*L = 0; f2 = -∑(Ma)/L
-    f2 = -this.summationOfMomentsAtLeftEnd() / this.data.length;
+    // ∑(Ma) + f2*L  = 0; f2 = -∑(Ma)/L
+    // NOTE: ∑(Ma) is the summation of moments at the left end including the Fixed end moments
+    const [m1, m2] = this.findFixedEndMoments();
+    f2 = -(this.summationOfMomentsAtLeftEnd() + m1 + m2) / this.data.length; 
 
     // ∑(Fy) = 0; f1 = ∑(Fy) - f2
     f1 = this.summationofVerticalForces() - f2;
@@ -308,7 +312,7 @@ export class BeamElement {
             const recheight = load.startMag;
             const triarea = (base * triheight) / 2;
             const recarea = base * recheight;
-            sum += (triarea + recarea);
+            sum += triarea + recarea;
           }
         }
         if (load.startMag > load.endMag) {
@@ -325,7 +329,7 @@ export class BeamElement {
             const recheight = load.endMag;
             const triarea = (base * triheight) / 2;
             const recarea = base * recheight;
-            sum += (triarea + recarea);
+            sum += triarea + recarea;
           }
         }
       }
@@ -352,7 +356,7 @@ export class BeamElement {
         // for uniform distributed loads
         const midLoadpoint = (load.start + load.end) / 2;
         const midLoadToEnd = midLoadpoint - this.data.start;
-        sum -= (((load.end - load.start) * load.startMag) * midLoadToEnd);
+        sum -= (load.end - load.start) * load.startMag * midLoadToEnd;
       } else {
         // for non-uniform distributed loads
         if (load.startMag < load.endMag) {
@@ -360,17 +364,17 @@ export class BeamElement {
             const base = load.end - load.start;
             const height = load.endMag;
             const area = (base * height) / 2;
-            const centroid = ((2 / 3) * base) + (load.start - this.data.start);
-            sum -= (area * centroid);
+            const centroid = (2 / 3) * base + (load.start - this.data.start);
+            sum -= area * centroid;
           } else {
             const base = load.end - load.start;
             const triheight = load.endMag - load.startMag;
             const recheight = load.startMag;
             const triarea = (base * triheight) / 2;
             const recarea = base * recheight;
-            const tricentroid = ((2 / 3) * base) + (load.start - this.data.start);
-            const reccentroid = (base / 2) + (load.start - this.data.start);
-            sum -= ((triarea * tricentroid) + (recarea * reccentroid));
+            const tricentroid = (2 / 3) * base + (load.start - this.data.start);
+            const reccentroid = base / 2 + (load.start - this.data.start);
+            sum -= triarea * tricentroid + recarea * reccentroid;
           }
         }
         if (load.startMag > load.endMag) {
@@ -378,17 +382,17 @@ export class BeamElement {
             const base = load.end - load.start;
             const height = load.startMag;
             const area = (base * height) / 2;
-            const centroid = ((1 / 3) * base) + (load.start - this.data.start);
-            sum -= (area * centroid);
+            const centroid = (1 / 3) * base + (load.start - this.data.start);
+            sum -= area * centroid;
           } else {
             const base = load.end - load.start;
             const triheight = load.startMag - load.endMag;
             const recheight = load.endMag;
             const triarea = (base * triheight) / 2;
             const recarea = base * recheight;
-            const tricentroid = ((1 / 3) * base) + (load.start - this.data.start);
-            const reccentroid = (base / 2) + (load.start - this.data.start);
-            sum -= ((triarea * tricentroid) + (recarea * reccentroid));
+            const tricentroid = (1 / 3) * base + (load.start - this.data.start);
+            const reccentroid = base / 2 + (load.start - this.data.start);
+            sum -= triarea * tricentroid + recarea * reccentroid;
           }
         }
       }
@@ -416,8 +420,8 @@ export class BeamElement {
       const b = this.data.end - load.location;
       const l = this.data.length;
       const p = load.magnitude;
-      sum1 -= (p * a * b * b) / (l * l);
-      sum2 += (p * a * a * b) / (l * l);
+      sum1 += (p * a * b * b) / (l * l);
+      sum2 -= (p * a * a * b) / (l * l);
     });
 
     // for distributed loads
@@ -432,8 +436,8 @@ export class BeamElement {
         const expressionRight = assembleExpression("right", p, l);
         const f1 = buildFunction(expressionLeft);
         const f2 = buildFunction(expressionRight);
-        sum1 -= adaptiveSimpsonsRule(f1, a, b);
-        sum2 += adaptiveSimpsonsRule(f2, a, b);
+        sum1 += adaptiveSimpsonsRule(f1, a, b);
+        sum2 -= adaptiveSimpsonsRule(f2, a, b);
       }
       if (load.startMag < load.endMag) {
         if (load.startMag === 0) {
@@ -446,31 +450,65 @@ export class BeamElement {
           const expressionRight = assembleExpression("right", p, l);
           const f1 = buildFunction(expressionLeft);
           const f2 = buildFunction(expressionRight);
-          sum1 -= adaptiveSimpsonsRule(f1, a, b);
-          sum2 += adaptiveSimpsonsRule(f2, a, b);
+          sum1 += adaptiveSimpsonsRule(f1, a, b);
+          sum2 -= adaptiveSimpsonsRule(f2, a, b);
         } else {
           const a = load.start - this.data.start;
           const b = load.end - this.data.start;
           const l = this.data.length;
           const p1 = load.startMag;
           const p2 = load.endMag;
-          const p = `(((${p2} - ${p1})*(x - ${a})/(${b} - ${a})) + ${p1})`;
+          const p = `(((${p2} - ${p1}) * (x - ${a}) / (${b} - ${a})) + ${p1})`;
           const expressionLeft = assembleExpression("left", p, l);
           const expressionRight = assembleExpression("right", p, l);
           const f1 = buildFunction(expressionLeft);
           const f2 = buildFunction(expressionRight);
-          sum1 -= adaptiveSimpsonsRule(f1, a, b);
-          sum2 += adaptiveSimpsonsRule(f2, a, b);
+          sum1 += adaptiveSimpsonsRule(f1, a, b);
+          sum2 -= adaptiveSimpsonsRule(f2, a, b);
         }
       }
       if (load.startMag > load.endMag) {
-        if ()
+        if (load.endMag === 0) {
+          const a = load.start - this.data.start;
+          const b = load.end - this.data.start;
+          const l = this.data.length;
+          const P = load.startMag;
+          const p = `((${P} * (${b} - x)) / (${b}-${a}))`;
+          const expressionLeft = assembleExpression("left", p, l);
+          const expressionRight = assembleExpression("right", p, l);
+          const f1 = buildFunction(expressionLeft);
+          const f2 = buildFunction(expressionRight);
+          sum1 += adaptiveSimpsonsRule(f1, a, b);
+          sum2 -= adaptiveSimpsonsRule(f2, a, b);
+        } else {
+          const a = load.start - this.data.start;
+          const b = load.end - this.data.start;
+          const l = this.data.length;
+          const p1 = load.startMag;
+          const p2 = load.endMag;
+          const p = `(((${p1} - ${p2}) * (${b}-x) / (${b}-${a})) + ${p2})`;
+          const expressionLeft = assembleExpression("left", p, l);
+          const expressionRight = assembleExpression("right", p, l);
+          const f1 = buildFunction(expressionLeft);
+          const f2 = buildFunction(expressionRight);
+          sum1 += adaptiveSimpsonsRule(f1, a, b);
+          sum2 -= adaptiveSimpsonsRule(f2, a, b);
+        }
       }
-
     });
 
-  }
+    // for moments
+    this.data.moments?.forEach((moment) => {
+      const a = moment.location - this.data.start;
+      const b = this.data.end - moment.location;
+      const l = this.data.length;
+      const m = moment.magnitude;
+      sum1 += (m * b * (2 * a - b)) / (l * l);
+      sum2 += (m * a * (2 * b - a)) / (l * l);
+    });
 
+    return [sum1, sum2];
+  }
 
   /**
    * returns the stiffness matrices of the beam element
@@ -480,4 +518,11 @@ export class BeamElement {
     return this.stiffnessMatrices;
   }
 
+  /**
+   * returns the element's data
+   * @returns the element's data
+   */
+  public getData(): BeamElementDataInterface {
+    return this.data;
+  }
 }

@@ -1,4 +1,4 @@
-import YoungModulus from "../lib/beam/numericCalculations/utils/youngModulus";
+import { YoungModulus } from "../lib/beam/numericCalculations/utils/youngModulus";
 
 describe("Young Modulus class", () => {
   test("Should throw an error with invalid unit input", () => {

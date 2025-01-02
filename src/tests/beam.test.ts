@@ -1,3 +1,4 @@
+import exp from "constants";
 import { Beam, deepCopy } from "../lib/beam/numericCalculations/utils/beam";
 import { BeamData } from "../lib/beam/numericCalculations/utils/uiInput";
 describe("Beam Class", () => {
@@ -19,11 +20,13 @@ describe("Beam Class", () => {
             value: 5,
             unit: "mm",
             direction: "down",
+            set: true,
           },
           rotation: {
             value: 0,
             unit: "radians",
             isClockwise: false,
+            set: false,
           },
         },
         {
@@ -33,11 +36,13 @@ describe("Beam Class", () => {
             value: 2,
             unit: "mm",
             direction: "down",
+            set: true,
           },
           rotation: {
             value: 5,
             unit: "degrees",
             isClockwise: true,
+            set: true,
           },
         },
         {
@@ -47,11 +52,13 @@ describe("Beam Class", () => {
             value: 6,
             unit: "mm",
             direction: "up",
+            set: true,
           },
           rotation: {
             value: 2,
             unit: "radians",
             isClockwise: false,
+            set: true,
           },
         },
       ],
@@ -204,7 +211,284 @@ describe("Beam Class", () => {
     expect(beam2.data.loads?.moments[1].location).toBe(0.0075);
   });
 
-  
+  test("ProcessDistributedLoads of right triangle full beam span", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 0,
+      end: 10,
+      startMag: 0,
+      endMag: 30,
+      unit: "kn/m",
+    });
+    const beam = new Beam(beamData);
+    const [element1, element2] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(30);
+
+  });
+
+  test("ProcessdistributedLoads of flipped right triangle full beam span", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 0,
+      end: 10,
+      startMag: 30,
+      endMag: 0,
+      unit: "kn/m",
+    });
+    const beam = new Beam(beamData);
+    const [element1, element2] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30);
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(0);
+  });
+
+  test("processDistributedLoads of udl accross one support", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 2.5,
+      end: 7.5,
+      startMag: 30,
+      endMag: 30,
+      unit: "kn/m",
+    });
+    const beam = new Beam(beamData);
+    const [element1, element2] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
+    expect(element1.getData().distributedLoads?.[0].end).toBe(5);
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(30);
+    expect(element2.getData().distributedLoads?.[0].start).toBe(5);
+    expect(element2.getData().distributedLoads?.[0].end).toBe(7.5);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(30);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(30);
+  });
+
+  test("processDistributedLoads of right triangle accross one support", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 2.5,
+      end: 7.5,
+      startMag: 0,
+      endMag: 30,
+      unit: "kn/m",
+    });
+    const beam = new Beam(beamData);
+    const [element1, element2] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
+    expect(element1.getData().distributedLoads?.[0].end).toBe(5);
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(0)
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].start).toBe(5);
+    expect(element2.getData().distributedLoads?.[0].end).toBe(7.5);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(30);
+  });
+
+  test("processDistributedLoads of flipped right triangle accross one support", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 2.5,
+      end: 7.5,
+      startMag: 30,
+      endMag: 0,
+      unit: "kn/m",
+    });
+    const beam = new Beam(beamData);
+    const [element1, element2] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
+    expect(element1.getData().distributedLoads?.[0].end).toBe(5);
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].start).toBe(5);
+    expect(element2.getData().distributedLoads?.[0].end).toBe(7.5);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(15);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(0);
+  });
+
+  test("processDistributedLoads of udl accross two supports", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 2.5,
+      end: 12.5,
+      startMag: 30,
+      endMag: 30,
+      unit: "kn/m",
+    });
+    beamData.beamLength.value = 15;
+    beamData.boundaryConditions.push({
+      type: "roller",
+      position: 15,
+      settlement: {
+        value: 0,
+        unit: "mm",
+        direction: "down",
+        set: false
+      },
+      rotation: {
+        value: 0,
+        unit: "radians",
+        isClockwise: false,
+        set: false
+      },
+    });
+    beamData.sectionProperties.push({
+      youngModulus: {
+        value: 200,
+        unit: "gpa",
+        coefficient: 1,
+      },
+      momentOfInertia: {
+        value: 0.0001,
+        unit: "m^4",
+        coefficient: 1,
+      },
+    });
+    beamData.noOfSpans = 3;
+    const beam = new Beam(beamData);
+    const [element1, element2, element3] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
+    expect(element1.getData().distributedLoads?.[0].end).toBe(5);
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(30);
+    expect(element2.getData().distributedLoads?.[0].start).toBe(5);
+    expect(element2.getData().distributedLoads?.[0].end).toBe(10);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(30);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(30);
+    expect(element3.getData().distributedLoads?.[0].start).toBe(10);
+    expect(element3.getData().distributedLoads?.[0].end).toBe(12.5);
+    expect(element3.getData().distributedLoads?.[0].startMag).toBe(30);
+    expect(element3.getData().distributedLoads?.[0].endMag).toBe(30);
+  });
+
+  test("processDistributedLoads of right triangle accross two supports", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 2.5,
+      end: 12.5,
+      startMag: 0,
+      endMag: 30,
+      unit: "kn/m",
+    });
+    beamData.beamLength.value = 15;
+    beamData.boundaryConditions.push({
+      type: "roller",
+      position: 15,
+      settlement: {
+        value: 0,
+        unit: "mm",
+        direction: "down",
+        set: false,
+      },
+      rotation: {
+        value: 0,
+        unit: "radians",
+        isClockwise: false,
+        set: false,
+      },
+    });
+    beamData.sectionProperties.push({
+      youngModulus: {
+        value: 200,
+        unit: "gpa",
+        coefficient: 1,
+      },
+      momentOfInertia: {
+        value: 0.0001,
+        unit: "m^4",
+        coefficient: 1,
+      },
+    });
+    beamData.noOfSpans = 3;
+    const beam = new Beam(beamData);
+    const [element1, element2, element3] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
+    expect(element1.getData().distributedLoads?.[0].end).toBe(5);
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(0)
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(7.5);
+    expect(element2.getData().distributedLoads?.[0].start).toBe(5);
+    expect(element2.getData().distributedLoads?.[0].end).toBe(10);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(7.5);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(22.5);
+    expect(element3.getData().distributedLoads?.[0].start).toBe(10);
+    expect(element3.getData().distributedLoads?.[0].end).toBe(12.5);
+    expect(element3.getData().distributedLoads?.[0].startMag).toBe(22.5);
+    expect(element3.getData().distributedLoads?.[0].endMag).toBe(30);
+  });
+
+  test("processDistributedLoads of flipped right triangle accross two supports", () => {
+    if (beamData.loads?.distributedLoads) {
+      beamData.loads.distributedLoads = [];
+    }
+    beamData.loads?.distributedLoads.push({
+      start: 2.5,
+      end: 12.5,
+      startMag: 30,
+      endMag: 0,
+      unit: "kn/m",
+    });
+    beamData.beamLength.value = 15;
+    beamData.boundaryConditions.push({
+      type: "roller",
+      position: 15,
+      settlement: {
+        value: 0,
+        unit: "mm",
+        direction: "down",
+        set: false,
+      },
+      rotation: {
+        value: 0,
+        unit: "radians",
+        isClockwise: false,
+        set: false,
+      },
+    });
+    beamData.sectionProperties.push({
+      youngModulus: {
+        value: 200,
+        unit: "gpa",
+        coefficient: 1,
+      },
+      momentOfInertia: {
+        value: 0.0001,
+        unit: "m^4",
+        coefficient: 1,
+      },
+    });
+    beamData.noOfSpans = 3;
+    const beam = new Beam(beamData);
+    const [element1, element2, element3] = beam.beamElements;
+    expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
+    expect(element1.getData().distributedLoads?.[0].end).toBe(5);
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].endMag).toBe(22.5);
+    expect(element2.getData().distributedLoads?.[0].start).toBe(5);
+    expect(element2.getData().distributedLoads?.[0].end).toBe(10);
+    expect(element2.getData().distributedLoads?.[0].startMag).toBe(22.5);
+    expect(element2.getData().distributedLoads?.[0].endMag).toBe(7.5);
+    expect(element3.getData().distributedLoads?.[0].start).toBe(10);
+    expect(element3.getData().distributedLoads?.[0].end).toBe(12.5);
+    expect(element3.getData().distributedLoads?.[0].startMag).toBe(7.5);
+    expect(element3.getData().distributedLoads?.[0].endMag).toBe(0);
+  });
+
 });
 
 describe("deepCopy Function", () => {
@@ -240,11 +524,13 @@ describe("deepCopy Function", () => {
             value: 0,
             unit: "mm",
             direction: "down",
+            set: false,
           },
           rotation: {
             value: 0,
             unit: "radians",
             isClockwise: false,
+            set: false,
           },
         },
         {
@@ -254,11 +540,13 @@ describe("deepCopy Function", () => {
             value: 0,
             unit: "m",
             direction: "down",
+            set: false,
           },
           rotation: {
             value: 0,
             unit: "radians",
             isClockwise: false,
+            set: false,
           },
         },
         {
@@ -268,11 +556,13 @@ describe("deepCopy Function", () => {
             value: 0,
             unit: "m",
             direction: "down",
+            set: false,
           },
           rotation: {
             value: 0,
             unit: "radians",
             isClockwise: false,
+            set: false,
           },
         },
       ],
