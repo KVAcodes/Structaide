@@ -24,11 +24,13 @@ export interface BoundaryCondition {
         value: number;
         unit: 'm' | 'cm' | 'mm' | 'km' | 'in' | 'ft' | 'yd';
         direction: 'up' | 'down';
+        set: boolean;
     }
     rotation: {
         value: number;
         unit: 'degrees' | 'radians';
         isClockwise: boolean;
+        set: boolean;
     };
 }
 
@@ -39,12 +41,12 @@ export interface BoundaryCondition {
  */
 interface SectionProperty {
     youngModulus: {
-        value: number;
+        value: number | null;
         unit: 'pa' | 'kpa' | 'mpa' | 'gpa' | 'psi' | 'psf' | 'ksi';
         coefficient: number;
     };
     momentOfInertia: {
-        value: number;
+        value: number | null;
         unit: 'm^4' | 'cm^4' | 'mm^4' | 'in^4' | 'ft^4';
         coefficient: number;
     };

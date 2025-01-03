@@ -13,7 +13,7 @@ import { YoungModulus } from "./youngModulus";
 import { MomentOfInertia } from "./momentOfInertia";
 import Matrix from "./matrices";
 import { conjugateGradient } from "./numericalMethods";
-import { beam1 } from "./Examples";
+import { beam1 } from "../testQuestions/Examples";
 
 export class Beam {
   private _data: BeamData;
@@ -25,6 +25,7 @@ export class Beam {
   private globalDisplacementVector: Matrix;
   private unknownDisplacements: (1 | null)[]; // Helps the global Displacement vector keep track of the displacements to be solved for, 1 for unknown, null for known
   public reactions: Matrix; // The reactions at the supports
+  public solvedDisplacements: number[]; // The solved displacements
   /**
    * Constructor for the Beam class.
    *
@@ -51,6 +52,7 @@ export class Beam {
       0
     );
     this.reactions = new Matrix(this.totalDegreesOfFreedom, 1, 0);
+    this.solvedDisplacements = [];
 
     this.resolveUnits();
     this.elements = this.splitIntoBeamElements();
@@ -677,9 +679,7 @@ export class Beam {
         reducedStiffnessMatrix.matrixData,
         reducedGlobalForceVector.matrixData.flat()
       );
-
-      // Debug
-      console.log("Solved Displacements: ", solvedDisplacements);
+      this.solvedDisplacements = solvedDisplacements;
 
       // Insert the solved displacements into the global displacement vector
       rowOrColumnToPartition.forEach((globalIndex, idx) => {
@@ -740,9 +740,3 @@ export function deepCopy<T>(obj: T): T {
   }
   return copy;
 }
-
-// test
-console.time("test");
-const beam = new Beam(beam1);
-console.log(beam.reactions.matrixData);
-console.timeEnd("test");

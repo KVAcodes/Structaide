@@ -27,11 +27,13 @@ describe("BeamElement Class", () => {
             value: 0,
             unit: "mm",
             direction: "down",
+            set: false,
           },
           rotation: {
             value: 0,
             unit: "radians",
             isClockwise: false,
+            set: false,
           },
         },
         {
@@ -41,11 +43,13 @@ describe("BeamElement Class", () => {
             value: 0,
             unit: "m",
             direction: "down",
+            set: false,
           },
           rotation: {
             value: 0,
             unit: "radians",
             isClockwise: false,
+            set: false,
           },
         },
       ],

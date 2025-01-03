@@ -1,6 +1,18 @@
 import exp from "constants";
 import { Beam, deepCopy } from "../lib/beam/numericCalculations/utils/beam";
 import { BeamData } from "../lib/beam/numericCalculations/utils/uiInput";
+import {
+  beam1,
+  beam2,
+  beam3,
+  beam4,
+  beam5,
+  beam6,
+  beam7,
+  beam8,
+  beam9,
+} from "../lib/beam/numericCalculations/testQuestions/Examples";
+
 describe("Beam Class", () => {
   let beamData: BeamData;
 
@@ -99,7 +111,7 @@ describe("Beam Class", () => {
             location: 7.5,
             magnitude: 2000,
             unit: "lbf",
-          }
+          },
         ],
         distributedLoads: [
           {
@@ -115,7 +127,7 @@ describe("Beam Class", () => {
             startMag: 20,
             endMag: 0,
             unit: "lbf/ft",
-          }
+          },
         ],
         moments: [
           {
@@ -129,7 +141,7 @@ describe("Beam Class", () => {
             magnitude: 5000,
             unit: "kn.mm",
             isClockwise: false,
-          }
+          },
         ],
       },
       noOfSpans: 2,
@@ -205,7 +217,7 @@ describe("Beam Class", () => {
     // magnitude resolution
     expect(beam2.data.loads?.moments[0].magnitude).toBe(-5);
     expect(beam2.data.loads?.moments[1].magnitude).toBe(5);
-    
+
     // location resolution
     expect(beam2.data.loads?.moments[0].location).toBe(0.0025);
     expect(beam2.data.loads?.moments[1].location).toBe(0.0075);
@@ -227,7 +239,6 @@ describe("Beam Class", () => {
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
     expect(element2.getData().distributedLoads?.[0].startMag).toBe(15);
     expect(element2.getData().distributedLoads?.[0].endMag).toBe(30);
-
   });
 
   test("ProcessdistributedLoads of flipped right triangle full beam span", () => {
@@ -264,7 +275,7 @@ describe("Beam Class", () => {
     const [element1, element2] = beam.beamElements;
     expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
     expect(element1.getData().distributedLoads?.[0].end).toBe(5);
-    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30);
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(30);
     expect(element2.getData().distributedLoads?.[0].start).toBe(5);
     expect(element2.getData().distributedLoads?.[0].end).toBe(7.5);
@@ -287,7 +298,7 @@ describe("Beam Class", () => {
     const [element1, element2] = beam.beamElements;
     expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
     expect(element1.getData().distributedLoads?.[0].end).toBe(5);
-    expect(element1.getData().distributedLoads?.[0].startMag).toBe(0)
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(0);
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
     expect(element2.getData().distributedLoads?.[0].start).toBe(5);
     expect(element2.getData().distributedLoads?.[0].end).toBe(7.5);
@@ -310,7 +321,7 @@ describe("Beam Class", () => {
     const [element1, element2] = beam.beamElements;
     expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
     expect(element1.getData().distributedLoads?.[0].end).toBe(5);
-    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30);
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(15);
     expect(element2.getData().distributedLoads?.[0].start).toBe(5);
     expect(element2.getData().distributedLoads?.[0].end).toBe(7.5);
@@ -337,13 +348,13 @@ describe("Beam Class", () => {
         value: 0,
         unit: "mm",
         direction: "down",
-        set: false
+        set: false,
       },
       rotation: {
         value: 0,
         unit: "radians",
         isClockwise: false,
-        set: false
+        set: false,
       },
     });
     beamData.sectionProperties.push({
@@ -363,7 +374,7 @@ describe("Beam Class", () => {
     const [element1, element2, element3] = beam.beamElements;
     expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
     expect(element1.getData().distributedLoads?.[0].end).toBe(5);
-    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30);
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(30);
     expect(element2.getData().distributedLoads?.[0].start).toBe(5);
     expect(element2.getData().distributedLoads?.[0].end).toBe(10);
@@ -420,7 +431,7 @@ describe("Beam Class", () => {
     const [element1, element2, element3] = beam.beamElements;
     expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
     expect(element1.getData().distributedLoads?.[0].end).toBe(5);
-    expect(element1.getData().distributedLoads?.[0].startMag).toBe(0)
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(0);
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(7.5);
     expect(element2.getData().distributedLoads?.[0].start).toBe(5);
     expect(element2.getData().distributedLoads?.[0].end).toBe(10);
@@ -477,7 +488,7 @@ describe("Beam Class", () => {
     const [element1, element2, element3] = beam.beamElements;
     expect(element1.getData().distributedLoads?.[0].start).toBe(2.5);
     expect(element1.getData().distributedLoads?.[0].end).toBe(5);
-    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30)
+    expect(element1.getData().distributedLoads?.[0].startMag).toBe(30);
     expect(element1.getData().distributedLoads?.[0].endMag).toBe(22.5);
     expect(element2.getData().distributedLoads?.[0].start).toBe(5);
     expect(element2.getData().distributedLoads?.[0].end).toBe(10);
@@ -488,7 +499,154 @@ describe("Beam Class", () => {
     expect(element3.getData().distributedLoads?.[0].startMag).toBe(7.5);
     expect(element3.getData().distributedLoads?.[0].endMag).toBe(0);
   });
+});
 
+describe("Test analysis", () => {
+  test("beam1 passes?", () => {
+    const beam = new Beam(beam1.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam1.result.displacements.length
+    );
+    beam1.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+  });
+
+  test("beam2 passes?", () => {
+    const beam = new Beam(beam2.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam2.result.displacements.length
+    );
+    beam2.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+  });
+
+  test("beam3 passes?", () => {
+    const beam = new Beam(beam3.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam3.result.displacements.length
+    );
+    beam3.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam3.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam3.result.reactions.length
+      );
+      beam3.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam4 passes?", () => {
+    const beam = new Beam(beam4.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam4.result.displacements.length
+    );
+    beam4.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam4.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam4.result.reactions.length
+      );
+      beam4.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam5 passes?", () => {
+    const beam = new Beam(beam5.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam5.result.displacements.length
+    );
+    beam5.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam5.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam5.result.reactions.length
+      );
+      beam5.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam6 passes?", () => {
+    const beam = new Beam(beam6.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam6.result.displacements.length
+    );
+    beam6.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam6.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam6.result.reactions.length
+      );
+      beam6.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam7 passes?", () => {
+    const beam = new Beam(beam7.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam7.result.displacements.length
+    );
+    beam7.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam7.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam7.result.reactions.length
+      );
+      beam7.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam8 passes?", () => {
+    const beam = new Beam(beam8.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam8.result.displacements.length
+    );
+    beam8.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam8.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam8.result.reactions.length
+      );
+      beam8.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam9 passes?", () => {
+    const beam = new Beam(beam9.beam);
+    expect(beam.solvedDisplacements.length).toEqual(
+      beam9.result.displacements.length
+    );
+    beam9.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam9.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam9.result.reactions.length
+      );
+      beam9.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
 });
 
 describe("deepCopy Function", () => {
