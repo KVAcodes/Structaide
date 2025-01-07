@@ -31,7 +31,10 @@ export interface BoundaryCondition {
         unit: 'degrees' | 'radians';
         isClockwise: boolean;
         set: boolean;
-    };
+    }; // NOTE THAT: SETTLEMENT AND ROTATION are values that are caused by the load acting on the beam
+       // They are information provided by observation/experiment or assumption
+       // They are additional information that aids in the analysis of the beam
+
 }
 
 /**

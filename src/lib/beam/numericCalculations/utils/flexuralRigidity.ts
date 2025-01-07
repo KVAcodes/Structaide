@@ -2,8 +2,8 @@
  * The Flexural Rigidity Class handles calculation of the Flexural Rigidity of a beam element.
  */
 
-import YoungModulus from "./youngModulus";
-import MomentOfInertia from "./momentOfInertia";
+import { YoungModulus } from "./youngModulus";
+import { MomentOfInertia } from "./momentOfInertia";
 
 export interface FlexuralRigidityOptions {
   YoungModulusObject?: YoungModulus;

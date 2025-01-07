@@ -263,12 +263,12 @@ export class BeamElement {
     let f2: number;
 
     // checking if the element has a free end
-    if (this.data.boundaries[0].type === "freeEnd") {
-      return [0, this.summationofVerticalForces()];
-    }
-    if (this.data.boundaries[1].type === "freeEnd") {
-      return [this.summationofVerticalForces(), 0];
-    }
+    // if (this.data.boundaries[0].type === "freeEnd") {
+    //   return [0, -this.summationofVerticalForces()];
+    // }
+    // if (this.data.boundaries[1].type === "freeEnd") {
+    //   return [-this.summationofVerticalForces(), 0];
+    // }
 
     // ∑(Ma) + f2*L  = 0; f2 = -∑(Ma)/L
     // NOTE: ∑(Ma) is the summation of moments at the left end including the Fixed end moments
@@ -509,6 +509,7 @@ export class BeamElement {
 
     return [sum1, sum2];
   }
+  
 
   /**
    * returns the stiffness matrices of the beam element

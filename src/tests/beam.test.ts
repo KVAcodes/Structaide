@@ -1,4 +1,3 @@
-import exp from "constants";
 import { Beam, deepCopy } from "../lib/beam/numericCalculations/utils/beam";
 import { BeamData } from "../lib/beam/numericCalculations/utils/uiInput";
 import {
@@ -11,7 +10,21 @@ import {
   beam7,
   beam8,
   beam9,
+  beam10,
+  beam11,
+  beam12,
+  beam13,
+  beam14,
+  beam15,
+  beam16,
+  beam17,
+  beam18,
+  beam19,
+  beam20,
+  beam21,
+  beam22,
 } from "../lib/beam/numericCalculations/testQuestions/Examples";
+import { BeamElement } from "@/lib/beam/numericCalculations/utils/beamElement";
 
 describe("Beam Class", () => {
   let beamData: BeamData;
@@ -643,6 +656,233 @@ describe("Test analysis", () => {
         beam9.result.reactions.length
       );
       beam9.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam10 passes?", () => {
+    const beam = new Beam(beam10.beam);
+
+    // not checking the lengths of the solvedDisplacement because the result does not solve for the freeend displacements, but the code does
+    beam10.result.displacements.forEach((displacement, i) => {
+      if (beam.solvedDisplacements[i]) {
+        expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+      }
+    });
+    if (beam10.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam10.result.reactions.length
+      );
+      beam10.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam11 passes?", () => {
+    const beam = new Beam(beam11.beam);
+
+    beam11.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam11.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam11.result.reactions.length
+      );
+      beam11.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam12 passes?", () => {
+    const beam = new Beam(beam12.beam);
+
+
+    // expect the last two values in beam.result.displacements to equal the last two values in beam.solvedDisplacements
+    const relevantDisplacements = beam.solvedDisplacements.slice(-2);
+    beam12.result.displacements.forEach((displacement, i) => {
+      expect(relevantDisplacements[i]).toBeCloseTo(displacement);
+    });
+
+
+    if (beam12.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam12.result.reactions.length
+      );
+      beam12.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam13 passes?", () => {
+    const beam = new Beam(beam13.beam);
+
+    const relevantDisplacements = beam.solvedDisplacements.slice(2,-2);
+    beam13.result.displacements.forEach((displacement, i) => {
+      expect(relevantDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam13.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam13.result.reactions.length
+      );
+      beam13.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam14 passes?", () => {
+    const beam = new Beam(beam14.beam);
+
+
+    const relevantDisplacements = beam.solvedDisplacements.slice(0,-2);
+    beam14.result.displacements.forEach((displacement, i) => {
+      expect(relevantDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam14.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam14.result.reactions.length
+      );
+      beam14.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam15 passes?", () => {
+    const beam = new Beam(beam15.beam);
+    expect(beam.solvedDisplacements.length).toEqual( // No free end displacements
+      beam15.result.displacements.length
+    );
+    beam15.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam15.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam15.result.reactions.length
+      );
+      beam15.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam16 passes?", () => {
+    const beam = new Beam(beam16.beam);
+    expect(beam.solvedDisplacements.length).toEqual( // No free end displacements
+      beam16.result.displacements.length
+    );
+    beam16.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam16.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam16.result.reactions.length
+      );
+      beam16.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam17 passes?", () => {
+    const beam = new Beam(beam17.beam);
+    expect(beam.solvedDisplacements.length).toEqual( // No free end displacements
+      beam17.result.displacements.length
+    );
+    beam17.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam17.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam17.result.reactions.length
+      );
+      beam17.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam18 passes?", () => {
+    const beam = new Beam(beam18.beam);
+    expect(beam.solvedDisplacements.length).toEqual( // No free end displacements
+      beam18.result.displacements.length
+    );
+    beam18.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam18.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam18.result.reactions.length
+      );
+      beam18.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam19 passes?", () => {
+    const beam = new Beam(beam19.beam);
+    expect(beam.solvedDisplacements.length).toEqual( // No free end displacements
+      beam19.result.displacements.length
+    );
+    beam19.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam19.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam19.result.reactions.length
+      );
+      beam19.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam20 passes?", () => {
+    const beam = new Beam(beam20.beam);
+    expect(beam.solvedDisplacements.length).toEqual( // No free end displacements
+      beam20.result.displacements.length
+    );
+    beam20.result.displacements.forEach((displacement, i) => {
+      expect(beam.solvedDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam20.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam20.result.reactions.length
+      );
+      beam20.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam21 passes?", () => {
+    const beam = new Beam(beam21.beam);
+    const relevantDisplacements = beam.solvedDisplacements.slice(0, 3);
+    beam21.result.displacements.forEach((displacement, i) => {
+      expect(relevantDisplacements[i]).toBeCloseTo(displacement);
+    });
+    if (beam21.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam21.result.reactions.length
+      );
+      beam21.result.reactions.forEach((reaction, i) => {
+        expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
+      });
+    }
+  });
+
+  test("beam22 passes?", () => {
+    const beam = new Beam(beam22.beam);
+    if (beam22.result.reactions) {
+      expect(beam.reactions.matrixData.flat().length).toEqual(
+        beam22.result.reactions.length
+      );
+      beam22.result.reactions.forEach((reaction, i) => {
         expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
       });
     }

@@ -278,16 +278,21 @@ export class Beam {
           beamElementData.end
         )
       );
-      // Remove the filtered point loads from the main list
-      pointLoads = pointLoads.filter(
-        (pointLoad) =>
-          !this.isLoadWithinElement(
-            pointLoad.location,
+      // Remove the filtered point loads from the main list: IN PLACE
+      for (let i = 0; i < pointLoads.length; i++) {
+        if (
+          this.isLoadWithinElement(
+            pointLoads[i].location,
             beamElementData.start,
             beamElementData.end
           )
-      );
-    }
+        ) {
+          pointLoads.splice(i, 1);
+          i--;
+        }
+      }
+
+    } 
   }
 
   /**
@@ -307,15 +312,19 @@ export class Beam {
           beamElementData.end
         )
       );
-      // Remove the filtered moments from the main list
-      moments = moments.filter(
-        (moment) =>
-          !this.isLoadWithinElement(
-            moment.location,
+      // Remove the filtered moments from the main list IN PLACE
+      for (let i = 0; i < moments.length; i++) {
+        if (
+          this.isLoadWithinElement(
+            moments[i].location,
             beamElementData.start,
             beamElementData.end
           )
-      );
+        ) {
+          moments.splice(i, 1);
+          i--;
+        }
+      }
     }
   }
 
