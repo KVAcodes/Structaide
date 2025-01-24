@@ -14,6 +14,7 @@ import {
   buildFunction,
   assembleExpression,
 } from "./calculus";
+import { deepCopy } from "./beam";
 /**
  * Represents the data been parsed into the beam Elements
  *
@@ -55,17 +56,20 @@ export interface DOFMapping {
 
 export class BeamElement {
   private data: BeamElementDataInterface;
+  public storedData: BeamElementDataInterface;
   public dofLabels: DOFMapping;
   public stiffnessMatrices: StiffnessMatrices;
   public localNodalForceVector: Matrix = new Matrix(4, 1);
   public localEquivalentForceVector: Matrix = new Matrix(4, 1);
-  public localDisplacementVector: Matrix | null = null;
+  public localDisplacementVector: Matrix | undefined;
+  public localForces: Matrix = new Matrix(4, 1);
 
   constructor(beamElementData: BeamElementDataInterface) {
     this.data = beamElementData;
+    this.storedData = deepCopy(beamElementData);
     this.dofLabels = this.setDOFLabels();
 
-    // Initializzing stiffnessMatrices with an empty object
+    // Initializing stiffnessMatrices with an empty object
     this.stiffnessMatrices = { normal: new Matrix(4, 4) };
     this.calculateStiffnessMatrices();
     this.getNodalForces();
@@ -273,7 +277,7 @@ export class BeamElement {
     // ∑(Ma) + f2*L  = 0; f2 = -∑(Ma)/L
     // NOTE: ∑(Ma) is the summation of moments at the left end including the Fixed end moments
     const [m1, m2] = this.findFixedEndMoments();
-    f2 = -(this.summationOfMomentsAtLeftEnd() + m1 + m2) / this.data.length; 
+    f2 = -(this.summationOfMomentsAtLeftEnd() + m1 + m2) / this.data.length;
 
     // ∑(Fy) = 0; f1 = ∑(Fy) - f2
     f1 = this.summationofVerticalForces() - f2;
@@ -509,7 +513,6 @@ export class BeamElement {
 
     return [sum1, sum2];
   }
-  
 
   /**
    * returns the stiffness matrices of the beam element
@@ -524,6 +527,54 @@ export class BeamElement {
    * @returns the element's data
    */
   public getData(): BeamElementDataInterface {
-    return this.data;
+    return this.storedData;
+  }
+
+  /**
+   * setter for the local displacement vector x calculate the local forces
+   * @param {Matrix} displacementVector - the local displacement vector
+   */
+  public setDisplacementVector(displacementVector: Matrix): void {
+    if (displacementVector.rows !== 4 || displacementVector.cols !== 1) {
+      throw new Error("Invalid dimensions for displacement vector");
+    }
+    this.localDisplacementVector = displacementVector;
+    this.calculateLocalForces();
+  }
+
+  /**
+   * calculates the local forces of the beam element
+   */
+  public calculateLocalForces(): void {
+    // checks if the local displacement vector has been set
+    if (!this.localDisplacementVector) {
+      throw new Error("Local displacement vector not set");
+    }
+
+    if (this.isNodeReleased("left")) {
+      this.localForces = Matrix.subtract(
+        Matrix.multiply(
+          this.stiffnessMatrices.leftReleased!,
+          this.localDisplacementVector
+        ),
+        this.localEquivalentForceVector
+      );
+    } else if (this.isNodeReleased("right")) {
+      this.localForces = Matrix.subtract(
+        Matrix.multiply(
+          this.stiffnessMatrices.rightReleased!,
+          this.localDisplacementVector
+        ),
+        this.localEquivalentForceVector
+      );
+    } else {
+      this.localForces = Matrix.subtract(
+        Matrix.multiply(
+          this.stiffnessMatrices.normal,
+          this.localDisplacementVector
+        ),
+        this.localEquivalentForceVector // TODO:
+      );
+    }
   }
 }

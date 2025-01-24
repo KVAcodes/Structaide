@@ -1,4 +1,3 @@
-import { Micro_5 } from "next/font/google";
 import { BeamData } from "../utils/uiInput";
 
 // Examples of the input data for the beam analysis.
@@ -2824,7 +2823,7 @@ export const beam21: Example = {
   }
 };
 
-// EXAMPLE
+// EXAMPLE 22
 export const beam22: Example = {
   beam: {
     isMetric: true,
@@ -2904,5 +2903,130 @@ export const beam22: Example = {
   result: {
     displacements: [],
     reactions: [15.667, 20, 11.333, -16]
+  }
+}
+
+// EXAMPLE 23
+// testing internal hinges
+
+export const beam23: Example = {
+  beam: {
+    isMetric: true,
+    isImperial: false,
+    beamLength: {
+      value: 10,
+      unit: 'm'
+    },
+    boundaryConditions: [
+      {
+        type: 'fixed',
+        position: 0,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'pinned',
+        position: 5,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'freeEnd',
+        position: 10,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      }
+    ],
+    sectionProperties: [
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+    ],
+    loads: {
+      pointLoads: [
+        {
+          location: 7.5,
+          magnitude: 50,
+          unit: 'kn'
+        },
+        {
+          location: 5,
+          magnitude: 40,
+          unit: 'kn'
+        },
+        {
+          location: 2.5,
+          magnitude: 20,
+          unit: 'kn'
+        }
+      ],
+      distributedLoads: [
+        {
+          start: 0,
+          end: 2.5,
+          startMag: 10,
+          endMag: 10,
+          unit: 'kn/m'
+        },
+      ],
+      moments: [
+      ]
+    },
+    noOfSpans: 2,
+  },
+  result: {
+    displacements: [],
+    reactions: [],
   }
 }

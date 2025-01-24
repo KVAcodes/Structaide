@@ -13,7 +13,6 @@ import { YoungModulus } from "./youngModulus";
 import { MomentOfInertia } from "./momentOfInertia";
 import Matrix from "./matrices";
 import { conjugateGradient } from "./numericalMethods";
-import { beam1 } from "../testQuestions/Examples";
 
 export class Beam {
   private _data: BeamData;
@@ -53,15 +52,17 @@ export class Beam {
     );
     this.reactions = new Matrix(this.totalDegreesOfFreedom, 1, 0);
     this.solvedDisplacements = [];
+    let iteration: number = 1;
 
     this.resolveUnits();
-    this.elements = this.splitIntoBeamElements();
+    this.elements = this.splitIntoBeamElements(iteration);
     this.assembleGlobalStiffnessMatrix();
     this.assembleGlobalNodalForceVector();
     this.assembleGlobalEquivalentForceVector();
     this.assembleGlobalDisplacementVector();
     this.unknownDisplacements = this.populateUnknownDisplacements();
     this.solveForUnknownDisplacements();
+    this.parseLocalDisplacementVector();
   }
 
   /**
@@ -193,15 +194,16 @@ export class Beam {
   /**
    * Creates the beam Elements
    *
+   * @param {number} iteration first or second iteration for internal hinges
    * @returns {BeamElement[]} The beam elements
    */
-  private splitIntoBeamElements(): BeamElement[] {
+  private splitIntoBeamElements(iteration: number): BeamElement[] {
     const beamElements: BeamElement[] = [];
     const pointLoads = deepCopy(this.data.loads?.pointLoads);
     const moments = deepCopy(this.data.loads?.moments);
 
     for (let i = 0; i < this.data.noOfSpans; i++) {
-      const beamElementData = this.createBeamElementData(i);
+      const beamElementData = this.createBeamElementData(i, iteration);
       this.processPointLoads(beamElementData, pointLoads);
       this.processDistributedLoads(beamElementData);
       this.processMoments(beamElementData, moments);
@@ -210,23 +212,51 @@ export class Beam {
     return beamElements;
   }
 
+
+  // how to handle internalHinges:
+  // set a global lookout "iteration" variable
+  // if the iteration is 1(1st iteration), when the creating beam data:
+  //  any element with internalHinge at the right end of it should have a rightReleased stiffness matrix
+  // any element with internalHinge at the left end of it should have a Normal stiffness matrix
+  // if the iteration is 2(2nd iteration), when creating beam data:
+  // any element with internalHinge at the left end of it should have a leftReleased stiffness matrix
+  // any element with internalHinge at the right end of it should have a Normal stiffness matrix
+
   /**
    * helper function to splitIntoBeamElements - creates beamElement data
    * @param spanIndex
+   * @param iteration
    * @returns {any} The beam element data
    */
-  private createBeamElementData(spanIndex: number): any {
+  private createBeamElementData(spanIndex: number, iteration: number): any {
     const elementData: any = {
       isMetric: this.data.isMetric,
       spanNo: spanIndex + 1,
-      start: this.data.boundaryConditions[spanIndex].position,
-      end: this.data.boundaryConditions[spanIndex + 1].position,
     };
+    const leftBoundary = deepCopy(this.data.boundaryConditions[spanIndex]);
+    const rightBoundary = deepCopy(this.data.boundaryConditions[spanIndex + 1]);
+    if (iteration === 1) {
+      if (leftBoundary.type === "internalHinge") {
+        leftBoundary.type = "midSpan";
+        elementData.start = leftBoundary.position;
+      } else {
+        elementData.start = leftBoundary.position;
+      }
+      elementData.end = rightBoundary.position;
+    } else if (iteration === 2) {
+      if (rightBoundary.type === "internalHinge") {
+        rightBoundary.type = "midSpan";
+        elementData.end = rightBoundary.position;
+      } else {
+        elementData.end = rightBoundary.position;
+      }
+      elementData.start = leftBoundary.position;
+    }
     elementData.length = elementData.end - elementData.start;
     elementData.section = this.createFlexuralRigidity(spanIndex);
     elementData.boundaries = [
-      this.data.boundaryConditions[spanIndex],
-      this.data.boundaryConditions[spanIndex + 1],
+      leftBoundary,
+      rightBoundary
     ];
 
     return elementData;
@@ -598,6 +628,7 @@ export class Beam {
             unknowns[globalDOF[1]] = 1;
           }
           break;
+        case "midSpan":
         case "internalHinge":
         case "freeEnd":
           if (!boundaryCondition.settlement.set) {
@@ -726,6 +757,26 @@ export class Beam {
   get beamElements(): BeamElement[] {
     return this.elements;
   }
+
+  /**
+   * parse the global displacement vector to the local element displacement vector
+   * 
+   */
+  public parseLocalDisplacementVector(): void {
+    this.elements.forEach((element) => {
+      const localDisplacementVector = new Matrix(
+        element.dofLabels.local.length,
+        1,
+        0
+      );
+      const globalDOF = element.dofLabels.global;
+      element.dofLabels.local.forEach((localIndex, index) => {
+        localDisplacementVector.set(index, 0, this.globalDisplacementVector.get(globalDOF[localIndex], 0));
+      });
+      element.setDisplacementVector(localDisplacementVector);
+    });
+  }
+
 }
 
 /**

@@ -18,7 +18,7 @@ interface BeamLength {
  * @interface
  */
 export interface BoundaryCondition {
-    type: "fixed" | "pinned" | "roller" | "internalHinge" | "freeEnd";
+    type: "fixed" | "pinned" | "roller" | "internalHinge" | "freeEnd" | "midSpan";
     position: number;
     settlement: {
         value: number;

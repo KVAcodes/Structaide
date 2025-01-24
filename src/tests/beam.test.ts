@@ -23,8 +23,8 @@ import {
   beam20,
   beam21,
   beam22,
+  beam23
 } from "../lib/beam/numericCalculations/testQuestions/Examples";
-import { BeamElement } from "@/lib/beam/numericCalculations/utils/beamElement";
 
 describe("Beam Class", () => {
   let beamData: BeamData;
@@ -886,6 +886,13 @@ describe("Test analysis", () => {
         expect(beam.reactions.matrixData.flat()[i]).toBeCloseTo(reaction);
       });
     }
+  });
+  
+  test.only("beam23 passes?", () => {
+    const beam = new Beam(beam23.beam);
+    beam.beamElements.forEach((element, i) => {
+      console.log(element.localForces.matrixData.flat());
+    });
   });
 });
 
