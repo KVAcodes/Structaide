@@ -37,9 +37,23 @@ export function processBeam(inputData: BeamData): BeamData {
         },
     }
 
-    // handle case of 
+    // handle case of successive internal hinges: adds a midspan at the center of the hinges
+    const newBoundaryConditions: BoundaryCondition[] = [];
+    boundaryConditions.forEach((boundaryCondition, index) => {
+        if (boundaryCondition.type === 'internalHinge' && boundaryConditions[index + 1]?.type === 'internalHinge') {
+            const midSpanPosition = (boundaryCondition.position + boundaryConditions[index + 1].position) / 2;
+            const boundaryConditionObject = deepCopy(boundaryConditionObjectForMidSpan);
+            boundaryConditionObject.position = midSpanPosition;
+            newBoundaryConditions.push(boundaryConditionObject);
+            // add a section property for the midspan created
+            sectionProperties.splice(index + 1, 0, sectionProperties[index]);
+        }
+    });
+    boundaryConditions.push(...newBoundaryConditions);
+    boundaryConditions.sort((a, b) => a.position - b.position);
 
-    data.boundaryConditions.forEach((boundaryCondition) => {
+    // get all the state positions
+    boundaryConditions.forEach((boundaryCondition) => {
         boundaryStatePositions.push(boundaryCondition.position);
     }
     );

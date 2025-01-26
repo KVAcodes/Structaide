@@ -250,7 +250,14 @@ export class BeamElement {
     // finding the simply supported reactions
     const [f1, f2] = this.applyEquilibriumEquations();
     // finding the fixed end moments
-    const [m1, m2] = this.findFixedEndMoments();
+    let [m1, m2] = this.findFixedEndMoments();
+
+    if (this.isNodeReleased("left")) {
+      m1 = 0;
+    }
+    if (this.isNodeReleased("right")) {
+      m2 = 0;
+    }
     // forming the Equivalent force vector
     const equivalentForcesArray: number[][] = [[f1], [-m1], [f2], [-m2]];
 
@@ -276,7 +283,13 @@ export class BeamElement {
 
     // ∑(Ma) + f2*L  = 0; f2 = -∑(Ma)/L
     // NOTE: ∑(Ma) is the summation of moments at the left end including the Fixed end moments
-    const [m1, m2] = this.findFixedEndMoments();
+    let [m1, m2] = this.findFixedEndMoments();
+    if (this.isNodeReleased("left")) {
+      m1 = 0;
+    }
+    if (this.isNodeReleased("right")) {
+      m2 = 0;
+    }
     f2 = -(this.summationOfMomentsAtLeftEnd() + m1 + m2) / this.data.length;
 
     // ∑(Fy) = 0; f1 = ∑(Fy) - f2

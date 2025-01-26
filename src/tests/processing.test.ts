@@ -24,14 +24,73 @@ import {
     beam21,
     beam22,
     beam23,
+    beam24,
+    beam25,
+    beam26,
+    beam27,
+    beam28,
   } from "../lib/beam/numericCalculations/testQuestions/Examples";
 import { Beam } from "@/lib/beam/numericCalculations/utils/beam";
 
 describe("processBeam", () => {
-    test("beam23 passes", () => {
+    test.only("beam23 passes", () => {
       const beam = new Beam(processBeam(beam23.beam));
       beam.beamElements.forEach((element) => {
         console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
       });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
+
+    });
+
+    test("beam24 passes", () => {
+      const beam = new Beam(processBeam(beam24.beam));
+      beam.beamElements.forEach((element) => {
+        console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
+      });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
+    });
+
+    test("beam25 passes", () => {
+      const beam = new Beam(processBeam(beam25.beam));
+      beam.beamElements.forEach((element) => {
+        console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
+      });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
+    });
+
+    test("beam26 passes", () => {
+      const beam = new Beam(processBeam(beam26.beam));
+      beam.beamElements.forEach((element) => {
+        console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
+      });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
+    });
+
+    test("beam27 passes", () => {
+      const beam = new Beam(processBeam(beam27.beam));
+      beam.beamElements.forEach((element) => {
+        console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
+      });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
+    });
+
+    test("beam28 passes", () => {
+      const beam = new Beam(processBeam(beam28.beam));
+      beam.beamElements.forEach((element) => {
+        console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
+      });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
     });
 });

@@ -2911,15 +2911,15 @@ export const beam22: Example = {
 
 export const beam23: Example = {
   beam: {
-    isMetric: true,
-    isImperial: false,
+    isMetric: false,
+    isImperial: true,
     beamLength: {
-      value: 10,
-      unit: 'm'
+      value: 500,
+      unit: 'ft'
     },
     boundaryConditions: [
       {
-        type: 'fixed',
+        type: 'pinned',
         position: 0,
         settlement: {
           value: 0,
@@ -2935,8 +2935,24 @@ export const beam23: Example = {
         }
       },
       {
-        type: 'pinned',
-        position: 5,
+        type: 'roller',
+        position: 100,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 190,
         settlement: {
           value: 0,
           unit: 'm',
@@ -2951,13 +2967,45 @@ export const beam23: Example = {
         }
       },
       {
-        type: 'freeEnd',
-        position: 10,
+        type: 'internalHinge',
+        position: 310,
         settlement: {
           value: 0,
           unit: 'm',
           direction: 'down',
-          set: false,
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 400,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 500,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
         },
         rotation: {
           value: 0,
@@ -2992,38 +3040,852 @@ export const beam23: Example = {
           coefficient: 1
         }
       },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      }
     ],
     loads: {
       pointLoads: [
         {
-          location: 7.5,
-          magnitude: 50,
-          unit: 'kn'
+          location: 220,
+          magnitude: 100,
+          unit: 'kipf'
         },
-        {
-          location: 5,
-          magnitude: 40,
-          unit: 'kn'
-        },
-        {
-          location: 2.5,
-          magnitude: 20,
-          unit: 'kn'
-        }
       ],
       distributedLoads: [
         {
           start: 0,
-          end: 2.5,
-          startMag: 10,
-          endMag: 10,
+          end: 500,
+          startMag: 2000,
+          endMag: 2000,
+          unit: 'lbf/ft'
+        },
+      ],
+      moments: [
+      ]
+    },
+    noOfSpans: 5,
+  },
+  result: {
+    displacements: [],
+    reactions: [],
+  }
+}
+
+// EXAMPLE 24
+// testing internal hinges
+export const beam24: Example = {
+  beam: {
+    isMetric: true,
+    isImperial: false,
+    beamLength: {
+      value: 20,
+      unit: 'm'
+    },
+    boundaryConditions: [
+      {
+        type: 'fixed',
+        position: 0,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 5,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 10,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 15,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 20,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      }
+    ],
+    sectionProperties: [
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      }
+    ],
+    loads: {
+      pointLoads: [
+      ],
+      distributedLoads: [
+        {
+          start: 0,
+          end: 20,
+          startMag: 117,
+          endMag: 0,
           unit: 'kn/m'
         },
       ],
       moments: [
       ]
     },
-    noOfSpans: 2,
+    noOfSpans: 4,
+  },
+  result: {
+    displacements: [],
+    reactions: [],
+  }
+}
+
+
+// EXAMPLE 25
+// testing internal hinges
+export const beam25: Example = {
+  beam: {
+    isMetric: true,
+    isImperial: false,
+    beamLength: {
+      value: 18,
+      unit: 'm'
+    },
+    boundaryConditions: [
+      {
+        type: 'pinned',
+        position: 0,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 9,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 12,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 18,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      }
+    ],
+    sectionProperties: [
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+    ],
+    loads: {
+      pointLoads: [
+        {
+          location: 15,
+          magnitude: 55,
+          unit: 'kn'
+        },
+      ],
+      distributedLoads: [
+        {
+          start: 0,
+          end: 12,
+          startMag: 15,
+          endMag: 15,
+          unit: 'kn/m'
+        },
+      ],
+      moments: [
+      ]
+    },
+    noOfSpans: 3,
+  },
+  result: {
+    displacements: [],
+    reactions: [],
+  }
+}
+
+
+// EXAMPLE 26
+// testing internal hinges
+export const beam26: Example = {
+  beam: {
+    isMetric: true,
+    isImperial: false,
+    beamLength: {
+      value: 18,
+      unit: 'm'
+    },
+    boundaryConditions: [
+      {
+        type: 'fixed',
+        position: 0,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 6,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 12,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'fixed',
+        position: 18,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      }
+    ],
+    sectionProperties: [
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+
+    ],
+    loads: {
+      pointLoads: [
+        {
+          location: 6,
+          magnitude: 120,
+          unit: 'kn'
+        },
+      ],
+      distributedLoads: [
+
+      ],
+      moments: [
+      ]
+    },
+    noOfSpans: 3,
+  },
+  result: {
+    displacements: [],
+    reactions: [],
+  }
+}
+
+// EXAMPLE 27
+// testing internal hinges
+export const beam27: Example = {
+  beam: {
+    isMetric: false,
+    isImperial: true,
+    beamLength: {
+      value: 25,
+      unit: 'ft'
+    },
+    boundaryConditions: [
+      {
+        type: 'pinned',
+        position: 0,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 10,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 15,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false,
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 25,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      }
+    ],
+    sectionProperties: [
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+
+    ],
+    loads: {
+      pointLoads: [
+        {
+          location: 15,
+          magnitude: 12,
+          unit: 'kipf'
+        },
+        {
+          location: 20,
+          magnitude: 24,
+          unit: 'kipf'
+        }
+      ],
+      distributedLoads: [
+
+      ],
+      moments: [
+      ]
+    },
+    noOfSpans: 3,
+  },
+  result: {
+    displacements: [],
+    reactions: [],
+  }
+}
+
+// EXAMPLE 28
+// testing internal hinges
+export const beam28: Example = {
+  beam: {
+    isMetric: true,
+    isImperial: false,
+    beamLength: {
+      value: 27,
+      unit: 'm'
+    },
+    boundaryConditions: [
+      {
+        type: 'pinned',
+        position: 0,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 4,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 8,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 18,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      },
+      {
+        type: 'internalHinge',
+        position: 24,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: false,
+          set: false
+        }
+      },
+      {
+        type: 'roller',
+        position: 27,
+        settlement: {
+          value: 0,
+          unit: 'm',
+          direction: 'down',
+          set: false
+        },
+        rotation: {
+          value: 0,
+          unit: 'radians',
+          isClockwise: true,
+          set: false
+        }
+      }
+    ],
+    sectionProperties: [
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      },
+      {
+        youngModulus: {
+          value: null,
+          unit: 'kpa',
+          coefficient: 1
+        },
+        momentOfInertia: {
+          value: null,
+          unit: 'm^4',
+          coefficient: 1
+        }
+      }
+    ],
+    loads: {
+      pointLoads: [
+      ],
+      distributedLoads: [
+        {
+          start: 0,
+          end: 13,
+          startMag: 0,
+          endMag: 77,
+          unit: 'kn/m'
+        },
+        {
+          start: 13,
+          end: 27,
+          startMag: 77,
+          endMag: 0,
+          unit: 'kn/m'
+        }
+      ],
+      moments: [
+      ]
+    },
+    noOfSpans: 5,
   },
   result: {
     displacements: [],

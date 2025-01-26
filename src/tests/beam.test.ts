@@ -888,7 +888,7 @@ describe("Test analysis", () => {
     }
   });
   
-  test.only("beam23 passes?", () => {
+  test("beam23 passes?", () => {
     const beam = new Beam(beam23.beam);
     beam.beamElements.forEach((element, i) => {
       console.log(element.localForces.matrixData.flat());
