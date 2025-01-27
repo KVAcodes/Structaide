@@ -33,7 +33,7 @@ import {
 import { Beam } from "@/lib/beam/numericCalculations/utils/beam";
 
 describe("processBeam", () => {
-    test.only("beam23 passes", () => {
+    test("beam23 passes", () => {
       const beam = new Beam(processBeam(beam23.beam));
       beam.beamElements.forEach((element) => {
         console.log(element.localForces.matrixData.flat());
@@ -54,8 +54,8 @@ describe("processBeam", () => {
       console.log(beam.reactions.matrixData.flat());
     });
 
-    test("beam25 passes", () => {
-      const beam = new Beam(processBeam(beam25.beam));
+    test.only("beam25 passes", () => {
+      const beam = new Beam(processBeam(beam25.beam), 2);
       beam.beamElements.forEach((element) => {
         console.log(element.localForces.matrixData.flat());
         console.log(element.getData().boundaries);

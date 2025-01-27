@@ -30,7 +30,7 @@ export class Beam {
    *
    * @param {BeamData} data The input data for the beam analysis.
    */
-  constructor(data: BeamData) {
+  constructor(data: BeamData, iteration: number = 1) {
     this._data = deepCopy(data);
     this.elements = [];
     this.totalDegreesOfFreedom = this.data.boundaryConditions.length * 2;
@@ -52,8 +52,6 @@ export class Beam {
     );
     this.reactions = new Matrix(this.totalDegreesOfFreedom, 1, 0);
     this.solvedDisplacements = [];
-    let iteration: number = 1;
-
     this.resolveUnits();
     this.elements = this.splitIntoBeamElements(iteration);
     this.assembleGlobalStiffnessMatrix();

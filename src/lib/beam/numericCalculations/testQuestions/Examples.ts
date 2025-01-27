@@ -3694,7 +3694,6 @@ export const beam27: Example = {
 }
 
 // EXAMPLE 28
-// testing internal hinges
 export const beam28: Example = {
   beam: {
     isMetric: true,

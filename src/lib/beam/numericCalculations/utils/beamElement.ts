@@ -61,7 +61,7 @@ export class BeamElement {
   public stiffnessMatrices: StiffnessMatrices;
   public localNodalForceVector: Matrix = new Matrix(4, 1);
   public localEquivalentForceVector: Matrix = new Matrix(4, 1);
-  public localDisplacementVector: Matrix | undefined;
+  public localDisplacementVector: Matrix = new Matrix(4, 1);
   public localForces: Matrix = new Matrix(4, 1);
 
   constructor(beamElementData: BeamElementDataInterface) {
@@ -586,7 +586,7 @@ export class BeamElement {
           this.stiffnessMatrices.normal,
           this.localDisplacementVector
         ),
-        this.localEquivalentForceVector // TODO:
+        this.localEquivalentForceVector
       );
     }
   }
