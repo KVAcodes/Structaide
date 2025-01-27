@@ -115,7 +115,7 @@ export class PostProcess {
         elementResults.slope.coefficients.A3,
         elementResults.slope.coefficients.A4,
       ] = [
-        element.localDisplacementVector.get(1, 0) / EI,
+        element.localDisplacementVector.get(1, 0),
         -element.localForces.get(1, 0) / EI,
         element.localForces.get(0, 0) / (2 * EI),
         -a0OfWeight / (6 * EI),
@@ -130,8 +130,8 @@ export class PostProcess {
         elementResults.deflection.coefficients.A4,
         elementResults.deflection.coefficients.A5,
       ] = [
-        element.localDisplacementVector.get(0, 0) / EI,
-        element.localDisplacementVector.get(1, 0) / EI,
+        element.localDisplacementVector.get(0, 0),
+        element.localDisplacementVector.get(1, 0),
         -element.localForces.get(1, 0) / (2 * EI),
         element.localForces.get(0, 0) / (6 * EI),
         -a0OfWeight / (24 * EI),

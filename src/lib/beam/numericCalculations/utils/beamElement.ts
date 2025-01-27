@@ -273,14 +273,6 @@ export class BeamElement {
     let f1: number;
     let f2: number;
 
-    // checking if the element has a free end
-    // if (this.data.boundaries[0].type === "freeEnd") {
-    //   return [0, -this.summationofVerticalForces()];
-    // }
-    // if (this.data.boundaries[1].type === "freeEnd") {
-    //   return [-this.summationofVerticalForces(), 0];
-    // }
-
     // ∑(Ma) + f2*L  = 0; f2 = -∑(Ma)/L
     // NOTE: ∑(Ma) is the summation of moments at the left end including the Fixed end moments
     let [m1, m2] = this.findFixedEndMoments();

@@ -28,6 +28,7 @@ import {
   beam26,
   beam27,
   beam28,
+  beam29,
 } from "../lib/beam/numericCalculations/testQuestions/Examples";
 
 describe("PostProcess", () => {
@@ -35,8 +36,8 @@ describe("PostProcess", () => {
         const results = new PostProcess(beam25.beam);
         console.dir(results.postProcessResults, { depth: null });
     });
-    test.only("beam12 passes", () => {
-        const results = new PostProcess(beam12.beam)
+    test.only("beam29 passes", () => {
+        const results = new PostProcess(beam29.beam)
         console.dir(results.postProcessResults, { depth: null });
     });
 });

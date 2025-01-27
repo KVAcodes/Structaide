@@ -29,6 +29,7 @@ import {
     beam26,
     beam27,
     beam28,
+    beam29,
   } from "../lib/beam/numericCalculations/testQuestions/Examples";
 import { Beam } from "@/lib/beam/numericCalculations/utils/beam";
 
@@ -54,7 +55,7 @@ describe("processBeam", () => {
       console.log(beam.reactions.matrixData.flat());
     });
 
-    test.only("beam25 passes", () => {
+    test("beam25 passes", () => {
       const beam = new Beam(processBeam(beam25.beam), 2);
       beam.beamElements.forEach((element) => {
         console.log(element.localForces.matrixData.flat());
@@ -86,6 +87,16 @@ describe("processBeam", () => {
 
     test("beam28 passes", () => {
       const beam = new Beam(processBeam(beam28.beam));
+      beam.beamElements.forEach((element) => {
+        console.log(element.localForces.matrixData.flat());
+        console.log(element.getData().boundaries);
+      });
+      console.log(beam.solvedDisplacements);
+      console.log(beam.reactions.matrixData.flat());
+    });
+
+    test.only("beam29 passes", () => {
+      const beam = new Beam(processBeam(beam29.beam));
       beam.beamElements.forEach((element) => {
         console.log(element.localForces.matrixData.flat());
         console.log(element.getData().boundaries);
